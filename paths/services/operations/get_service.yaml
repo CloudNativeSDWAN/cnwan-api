@@ -1,0 +1,49 @@
+tags:
+  - services
+summary: Retrieve data about a single service.
+description: |
+  This path returns a single service, if it exists.<br/>
+operationId: getService
+
+
+parameters:
+  - name: name
+    in: path
+    description: The name of the service to get data for.
+    required: true
+    schema:
+      type: string
+      example: hr/payroll
+
+
+responses:
+  200:
+    summary: OK
+    description: The service was found and returned in the response body.
+    content:
+      application/json:
+        schema:
+          $ref: '../../../schemas/service.yaml'
+        examples:
+          payrollService:
+            $ref: "../../../examples/global_service_examples.yaml#/payrollService"
+          trainingService:
+            $ref: "../../../examples/global_service_examples.yaml#/trainingService"
+
+  404:
+    summary: Service not found
+    description: The service was not found. A `message` may be optionally
+      included.
+    content:
+      application/json:
+        schema:
+          $ref: '../../../schemas/response.yaml'
+        example:
+          code: 404
+          type: NOT_FOUND
+
+  500:
+    $ref: "../../../responses/global_responses.yaml#/genericError"
+
+  501:
+    $ref: "../../../responses/global_responses.yaml#/notImplemented"

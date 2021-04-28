@@ -1,0 +1,84 @@
+tags:
+  - services
+summary: Retrieve the list of applied services.
+description: |
+  `/services` returns an array of services that are currently being
+  applied.<br/><br/>
+operationId: listServices
+
+
+responses:
+
+  200:
+    # summary: Get a list of services currently applied # TODO: check this again
+    description: A list of services is returned, including data associated with
+      them, e.g. metadata and endpoints list.
+
+
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            $ref: '../../../schemas/service.yaml'
+
+
+        example:
+          - name: hr/payroll
+            metadata:
+              traffic-profile: standard
+              version: v1.2.1
+              commit: 4so3329zcv
+              maintainers: software-team
+              contact: support@department.my-company.com
+            endpoints:
+              - name: hr/payroll/payroll-asd4g31df
+                address: 10.10.10.1
+                port: 8080
+                metadata:
+                  weight: 25
+                protocols:
+                  transport: TCP
+              - name: hr/payroll/payroll-bfea51113
+                address: 10.10.10.2
+                port: 8080
+                metadata:
+                  weight: 25
+                protocols:
+                  transport: TCP
+              - name: hr/payroll/payroll-e24289aa5
+                address: 10.10.10.3
+                port: 8080
+                metadata:
+                  weight: 50
+                protocols:
+                  transport: TCP
+          - name: training
+            metadata:
+              traffic-profile: video
+              version: v1.5.0
+              maintainers: software-team
+              contact: job-training@company.com
+            endpoints:
+              - name: training-2zd5api8pr
+                address: 20.20.20.20
+                port: 80
+                protocols:
+                  transport: TCP
+                  application: HTTP
+              - name: training-ebe248c90
+                address: 20.20.20.21
+                port: 80
+                protocols:
+                  transport: TCP
+                  application: HTTP
+
+  500:
+    $ref: "../../../responses/global_responses.yaml#/genericError"
+
+  501:
+    $ref: "../../../responses/global_responses.yaml#/notImplemented"
+
+# TODO: this is a list operation, does this code really make any sense?
+  # 503:
+  #   $ref: "../../../responses/global_responses.yaml#/unauthenticated"

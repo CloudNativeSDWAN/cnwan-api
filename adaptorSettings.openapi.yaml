@@ -1,0 +1,57 @@
+openapi: 3.0.3
+info:
+  title: CN-WAN Adaptor settings API (WIP)
+  version: '1.0'
+  description: Retrieve adaptor settings.
+  contact:
+    name: The CN-WAN Project
+    url: 'https://github.com/CloudNativeSDWAN'
+    email: cnwan@cisco.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+servers:
+  - url: 'http://{host}:{port}/{basePath}/v1'
+    description: Endpoint where the CN-WAN Adaptor (or SD-WAN controller) is serving requests
+    variables:
+      host:
+        default: localhost
+        description: the host where the CN-WAN Adaptor (or SD-WAN controller) is serving requests
+      port:
+        default: '80'
+        description: the port where the CN-WAN Adaptor (or SD-WAN controller) is serving requests
+      basePath:
+        default: cnwan
+        description: the prefix path where to send data to.
+tags:
+  - name: settings
+paths:
+  /settings/metadata-keys:
+    get:
+      summary: Your GET endpoint
+      tags:
+        - settings
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+              examples:
+                Traffic profile:
+                  value:
+                    - traffic-profile
+        '503':
+          description: 'Service Unavailable: the adaptor was not available to reply for this request.'
+      operationId: getSettingsMetadataKeys
+      description: |
+        This method returns an array list with the metadata keys that a service must have in its metadata in order to be processed by the Adaptor.
+
+        **All** elements inside the array are required and must be present in a service metadata at the same time -- **AND** operand -- otherwise it is considered invalid.
+
+        An empty list is to be interpreted as a misconfiguration on the Adaptor side.
+components:
+  schemas: {}

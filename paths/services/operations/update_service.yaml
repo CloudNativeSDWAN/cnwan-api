@@ -1,0 +1,106 @@
+tags:
+  - services
+summary: Update a service.
+description: |
+  Provide new data for the service specified inside `{name}`.<br/>
+
+  As for `POST /services`, this operation may take a while, so it's common to
+  receive a `202 ACCEPTED` rather than a `200 OK`.<br/>
+operationId: putService
+
+
+parameters:
+  - name: name
+    in: path
+    description: The name of the service to update.
+    required: true
+    schema:
+      type: string
+      example: "hr/payroll"
+
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        $ref: '../../../schemas/service.yaml'
+      examples:
+        payrollService:
+          $ref: "../../../examples/global_service_examples.yaml#/payrollService"
+        trainingService:
+          $ref: "../../../examples/global_service_examples.yaml#/trainingService"
+  required: true
+
+
+responses:
+
+  202:
+    $ref: '../../../responses/global_responses.yaml#/202'
+
+  400:
+    summary: Bad request
+    description: The request is not valid. A `message` is included to provide
+      more information about the error.
+    content:
+      application/json:
+        schema:
+          $ref: '../../../schemas/response.yaml'
+        examples:
+          noDifference:
+            summary: Already applied
+            description: Since this method may take a while to complete, the
+              Adaptor tends to avoid re-processing data and therefore treats
+              data that was already reported as an error.
+            value:
+              code: 400
+              type: ALREADY_APPLIED
+              message: "This update has been already reported."
+          missingAddress:
+            summary: Missing address
+            description: "One or more endpoints have no address."
+            value:
+              code: 400
+              type: MISSING_ADDRESS
+              message: "Endpoint at position 1 has no address."
+          missingMetadata:
+            summary: Missing metadata
+            description: Provided service does not contain all required metadata keys.
+            value:
+              code: 400
+              type: MISSING_REQUIRED_METADATA
+              message: "Service does not contain 'traffic_profile' metadata key.
+                Please call GET /settings/metadata-keys to get the list of
+                required metadata keys."
+          missingServiceName:
+            summary: Missing service name
+            description: Provided service does not contain a name.
+            value:
+              code: 400
+              type: MISSING_SERVICE_NAME
+              message: "Service does not have a name."
+          missingEndpointName:
+            summary: Missing endpoint name
+            description: One or more endpoints have no name.
+            value:
+              code: 400
+              type: MISSING_ENDPOINT_NAME
+              message: "Endpoint at position 1 does not have a name."
+
+  404:
+    summary: Service not found
+    description: The service was not found. A `message` may be optionally
+      included.
+    content:
+      application/json:
+        schema:
+          $ref: '../../../schemas/response.yaml'
+        example:
+          code: 404
+          type: NOT_FOUND
+
+  500:
+    $ref: "../../../responses/global_responses.yaml#/genericError"
+
+# TODO: this is a list operation, does this code really make any sense?
+  503:
+    $ref: "../../../responses/global_responses.yaml#/unauthenticated"

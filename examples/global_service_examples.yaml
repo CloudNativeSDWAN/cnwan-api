@@ -1,0 +1,82 @@
+payrollService:
+  summary: Payroll service
+  description: "This is a service called *payroll* and shows an example of
+    a pseudo-hierarchical architecture. In the example, the service's name is
+    `hr/payroll`, which means that the service called *payroll* is inside a
+    *namespace* (e.g. if it is hosted in a *Kubernetes* cluster) or anyway
+    a group called *hr*, which supposedly contains other services
+    that have something in common with *payroll*, e.g. services used by or
+    created for the *HR* department.<br/><br/>
+
+    Finally, look at how the the enpoints inside `endpoints` all share the same
+    hierarchy."
+  value:
+    name: hr/payroll
+    metadata:
+      traffic-profile: standard
+      version: v1.2.1
+      commit: 4so3329zcv
+      maintainers: software-team
+      contact: support@department.my-company.com
+    endpoints:
+      - name: hr/payroll/payroll-asd4g31df
+        address: 10.10.10.1
+        port: 8080
+        metadata:
+          weight: 25
+        protocols:
+          transport: TCP
+      - name: hr/payroll/payroll-bfea51113
+        address: 10.10.10.2
+        port: 8080
+        metadata:
+          weight: 25
+        protocols:
+          transport: TCP
+      - name: hr/payroll/payroll-e24289aa5
+        address: 10.10.10.3
+        port: 8080
+        metadata:
+          weight: 50
+        protocols:
+          transport: TCP
+
+
+trainingService:
+  summary: Training service
+  description: This service does not belong to a hierarchical architecture, as
+    opposed to the `Payroll service` example, but follows a more "traditional"
+    flat model.
+  value:
+    name: training
+    metadata:
+      traffic-profile: video
+      version: v1.5.0
+      maintainers: software-team
+      contact: job-training@company.com
+    endpoints:
+      - name: training-2zd5api8pr
+        address: 20.20.20.20
+        port: 80
+        protocols:
+          transport: TCP
+          application: HTTP
+      - name: training-ebe248c90
+        address: 20.20.20.21
+        port: 80
+        protocols:
+          transport: TCP
+          application: HTTP
+
+
+emptyService:
+  summary: Service with no endpoints
+  description: An example of a service with an empty `endpoints` list. The
+    Adaptor will not consider this a strict error, but will just not proceed
+    with the parsing because it needs at least one endpoint to go on.
+  value:
+    name: user-profile
+    metadata:
+      traffic-profile: standard
+      contact: hr@company.com
+    endpoints: []

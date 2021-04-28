@@ -1,0 +1,28 @@
+tags:
+  - settings
+summary: Get the required metadata keys.
+description: |
+  This method returns an array list with the metadata keys that a service must
+  have in its metadata in order to be processed by the Adaptor.<br/><br/>
+
+  **All** elements inside the array are required and must be present in a
+  service metadata at the same time -- **AND** operand-- otherwise it is
+  considered invalid.<br/><br/>
+
+  An empty list is to be interpreted as a misconfiguration on the Adaptor side.
+
+operationId: getMetadataKeys
+
+
+responses:
+  200:
+    description: "OK"
+    content:
+      application/json:
+        schema:
+          type: array
+          items:
+            schema:
+              type: string
+        example:
+          - traffic-profile

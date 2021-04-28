@@ -1,0 +1,132 @@
+tags:
+  - services
+  # TODO: "create" is not a good name for this. Is apply too though?
+summary: Apply a new service.
+description: |
+  Notify the adaptor about a service that must be applied.<br/>
+
+  This operation may take a long time to complete, and therefore the Adaptor
+  may decide to return `202 Accepted` rather than `200 OK`: this means that
+  the data contained in the request is valid and the Adaptor will apply it
+  as soon as it can, e.g. it will be first put in an internal queue and be
+  processed when it finishes the operation that is currently running.<br/>
+
+  If the service is valid but `endpoints` is empty, the Adaptor will return a
+  `200 OK`, which just means that it acknowledged the existence of the service
+  but did **neither process it nor queued it** for later, as it needs its
+  endpoints list as well to proceed.
+
+  If the request body is **not** valid -- i.e. when the service has metadata that
+  the Adaptor is not interested in -- an error is immediately returned and the
+  response body contains the reason why it was rejected. 
+operationId: postService
+
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        $ref: "../../../schemas/service.yaml"
+      examples:
+        payrollService:
+          $ref: "../../../examples/global_service_examples.yaml#/payrollService"
+        trainingService:
+          $ref: "../../../examples/global_service_examples.yaml#/trainingService"
+        emptyService:
+          $ref: "../../../examples/global_service_examples.yaml#/emptyService"
+  description: Data about the service to apply, including its metadata and endpoints list.
+  required: true
+
+
+responses:
+  200:
+    summary: OK
+    description: The request was valid. A `message` may be included for more
+      information.
+    content:
+      application/json:
+        schema:
+          $ref: '../../../schemas/response.yaml'
+        examples:
+          200NoEndpoints:
+            summary: No endpoints
+            description: This response may be returned when the service is
+              valid but `endpoints` was empty.
+            value:
+              code: 200
+              type: OK
+              message: "The request is valid but no endpoints are included: no
+                further operation has been performed."
+          200EmptyMessage:
+            summary: Empty message
+            description: The Adaptor included no `message` field so there is
+              nothing relevant to report.
+            value:
+              code: 200
+              type: OK
+
+
+  202:
+    $ref: '../../../responses/global_responses.yaml#/202'
+
+  400:
+    summary: Bad request
+    description: The request is not valid. A `message` is included to provide
+      more information about the error.
+    content:
+      application/json:
+        schema:
+          $ref: '../../../schemas/response.yaml'
+        examples:
+          missingAddress:
+            summary: Missing address
+            description: "One or more endpoints have no address."
+            value:
+              code: 400
+              type: MISSING_ADDRESS
+              message: "Endpoint at position 1 has no address."
+          missingMetadata:
+            summary: Missing metadata
+            description: Provided service does not contain all required metadata keys.
+            value:
+              code: 400
+              type: MISSING_REQUIRED_METADATA
+              message: "Service does not contain 'traffic_profile' metadata key.
+                Please call GET /settings/metadata-keys to get the list of
+                required metadata keys."
+          missingServiceName:
+            summary: Missing service name
+            description: Provided service does not contain a name.
+            value:
+              code: 400
+              type: MISSING_SERVICE_NAME
+              message: "Service does not have a name."
+          missingEndpointName:
+            summary: Missing endpoint name
+            description: One or more endpoints have no name.
+            value:
+              code: 400
+              type: MISSING_ENDPOINT_NAME
+              message: "Endpoint at position 1 does not have a name."
+
+  409:
+    summary: Conflicting values
+    description: The request is valid but this service was already applied
+      before with different data. Usually this happens when wanting to update
+      a service but `POST` is called instead of `PUT`.
+    content:
+      application/json:
+        schema:
+          $ref: '../../../schemas/response.yaml'
+        example:
+          code: 409
+          type: ALREADY_APPLIED
+          message: "The service has been already applied before. If you
+          intend to update this, please use PUT."
+
+  500:
+    $ref: "../../../responses/global_responses.yaml#/genericError"
+
+# TODO: this is a list operation, does this code really make any sense?
+  503:
+    $ref: "../../../responses/global_responses.yaml#/unauthenticated"

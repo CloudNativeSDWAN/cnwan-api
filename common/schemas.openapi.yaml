@@ -1,0 +1,121 @@
+openapi: 3.0.3
+info:
+  title: CN-WAN Application Discovery API Schema Components (WIP)
+  version: '1.0'
+  description: Definition for schema components used by the *CN-WAN Application Discovery* API.
+  contact:
+    url: 'https://github.com/CloudNativeSDWAN'
+    email: cnwan@cisco.com
+    name: The CN-WAN Project
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+servers: []
+paths: {}
+components:
+  schemas:
+    Metadata:
+      description: A map of key-value data that provide more context/information about the resource.
+      x-examples: {}
+      type: object
+      additionalProperties:
+        type: string
+    Protocols:
+      title: Protocols
+      type: object
+      properties:
+        transport:
+          type: string
+          nullable: true
+          description: The transport layer protocol.
+        application:
+          type: string
+          nullable: true
+          description: The application layer protocol.
+      description: An object representing the protocols to be used for an endpoint.
+      x-examples: {}
+    Endpoint:
+      title: Endpoint
+      type: object
+      description: An object representing an Endpoint.
+      x-examples: {}
+      properties:
+        name:
+          type: string
+          description: Name of this endpoint.
+        address:
+          type: string
+          description: IP address to use to contact this endpoint.
+        protocols:
+          $ref: '#/components/schemas/Metadata'
+        port:
+          type: integer
+          format: int32
+          description: The port to use to contact this endpoint.
+          exclusiveMinimum: true
+          minimum: 0
+          maximum: 65535
+          default: 443
+          example: 443
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+      required:
+        - address
+        - port
+    Service:
+      title: Service
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of this service.
+        metadata:
+          $ref: '#/components/schemas/Metadata'
+        endpoints:
+          type: array
+          description: An array of endpoints to use to contact this service.
+          items:
+            $ref: '#/components/schemas/Endpoint'
+      required:
+        - name
+        - endpoints
+    Response:
+      title: Response
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          enum:
+            - 200
+            - 202
+            - 400
+            - 404
+            - 409
+            - 500
+            - 503
+          example: 200
+        type:
+          type: string
+          enum:
+            - OK
+            - ACCEPTED
+            - MISSING_ADDRESS
+            - MISSING_REQUIRED_METADATA
+            - MISSING_SERVICE_NAME
+            - MISSING_ENDPOINT_NAME
+            - ALREADY_APPLIED
+            - INTERNAL_SERVER_ERROR
+            - UNAUTHENTICATED
+            - NOT_FOUND
+            - NOT_IMPLEMENTED
+            - CONFLICT
+          default: OK
+          example: OK
+          nullable: true
+        message:
+          type: string
+          nullable: true
+      required:
+        - code
+  examples: {}

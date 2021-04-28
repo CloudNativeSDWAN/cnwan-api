@@ -1,0 +1,52 @@
+unauthenticated:
+  summmary: Adaptor not authenticated
+  description: The Adaptor rejects the incoming data because it's not
+    authenticated and can't apply the data.
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/response.yaml'
+      example:
+        code: 503
+        type: UNATHENTICATED
+        message: Cannot process data because the adaptor is not authenticated.
+
+genericError:
+  summmary: Internal server error
+  description: An unexpected error occurred while handling the request. The
+    `message` field inside the returned response may contain more information
+    about the error occurred.
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/response.yaml'
+      example:
+        code: 500
+        type: INTERNAL_SERVER_ERROR
+        message: "An error occurred while trying to parse the request." # TODO: more meaningful example here?
+
+notImplemented:
+  summmary: Not implemented
+  description: The current implementation of the Adaptor does not include
+    the requested operation.
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/response.yaml'
+      example:
+        code: 501
+        type: NOT_IMPLEMENTED
+        message: This method is not implemented. Please read the documentation
+          to learn about an alternative method for this operation.
+
+202:
+  summary: The operation has been accepted.
+  description: The operation has been accepted.
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/response.yaml'
+      example:
+        code: 202
+        type: ACCEPTED
+        message: The operation has been accepted.

@@ -1,0 +1,10 @@
+summary: List services or apply a new service.
+description: List services or apply a new service.
+
+
+get:
+  $ref: "./operations/list_services.yaml"
+
+
+post:
+  $ref: "./operations/create_service.yaml"

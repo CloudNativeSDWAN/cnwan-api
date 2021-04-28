@@ -1,0 +1,381 @@
+openapi: 3.0.3
+info:
+  title: CN-WAN Application Discovery API (WIP)
+  version: '1.0'
+  description: The **CN-WAN Application Discovery API** is designed for the transfer of application metadata to/from a *service registry*.
+  contact:
+    name: The CN-WAN Project
+    url: 'https://github.com/CloudNativeSDWAN'
+    email: cnwan@cisco.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+servers:
+  - url: 'http://{host}:{port}/{basePath}/v1'
+    description: Endpoint where the CN-WAN Adaptor (or SD-WAN controller) is serving requests
+    variables:
+      host:
+        default: localhost
+        description: the host where the CN-WAN Adaptor (or SD-WAN controller) is serving requests
+      port:
+        default: '80'
+        description: the port where the CN-WAN Adaptor (or SD-WAN controller) is serving requests
+      basePath:
+        default: cnwan
+        description: the prefix path where to send data to.
+tags:
+  - name: services
+paths:
+  /services:
+    get:
+      summary: Your GET endpoint
+      tags:
+        - services
+      responses:
+        '200':
+          $ref: '#/components/responses/listServices200'
+        '408':
+          description: 'Request Timeout: timeout expired while waiting for a response.'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+        '503':
+          description: Service Unavailable.
+      operationId: listServices
+      description: Retrieve an array of services that are currently being applied.
+    post:
+      summary: ''
+      operationId: createService
+      responses:
+        '200':
+          $ref: '#/components/responses/createService200'
+        '201':
+          description: Created successfully.
+        '202':
+          $ref: '#/components/responses/accepted'
+        '400':
+          description: 'Bad Request: The request is not valid. A `message` is included to provide more information about the error.'
+          content:
+            application/json:
+              schema:
+                $ref: ./common/schemas.openapi.yaml#/components/schemas/Response
+              examples:
+                Missing address:
+                  $ref: '#/components/examples/response-missing-address'
+                Missing metadata:
+                  $ref: '#/components/examples/response-missing-metadata'
+                Missing service name:
+                  $ref: '#/components/examples/response-missing-service-name'
+                Missing endpoint name:
+                  $ref: '#/components/examples/response-missing-endpoint-name'
+        '409':
+          description: 'Conflict: the resource already exists. Call `PUT` if you intend to update it.'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+      description: |-
+        Notify the adaptor about a service that must be applied.
+
+        This operation may take a long time to complete, and therefore the Adaptor may decide to return `202 Accepted` rather than `200 OK`: this means that the data contained in the request is valid and the Adaptor will apply it as soon as it can, e.g. it will be first put in an internal queue and be processed when it finishes the operation that is currently running.
+
+        If the service is valid but `endpoints` is empty, the Adaptor will return a `200 OK`, which just means that it acknowledged the existence of the service but did **neither process it nor queued it** for later, as it needs its endpoints list as well to proceed.
+
+        If the request body is **not** valid -- i.e. when the service has metadata that the Adaptor is not interested in -- an error is immediately returned and the
+        response body contains the reason why it was rejected. 
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: ./common/schemas.openapi.yaml#/components/schemas/Service
+        description: Data about the service to create.
+      tags:
+        - services
+  '/services/{serviceName}':
+    parameters:
+      - $ref: '#/components/parameters/service-name'
+    get:
+      summary: Your GET endpoint
+      tags:
+        - services
+      responses:
+        '200':
+          description: OK.
+          content:
+            application/json:
+              schema:
+                $ref: ./common/schemas.openapi.yaml#/components/schemas/Service
+              examples:
+                Payroll:
+                  $ref: '#/components/examples/payroll-service'
+                Training:
+                  $ref: '#/components/examples/training-service'
+                Service with no endpoints:
+                  $ref: '#/components/examples/service-empty-endpoints'
+            application/xml:
+              schema:
+                type: object
+                properties: {}
+        '404':
+          description: Not Found.
+        '500':
+          $ref: '#/components/responses/internalServerError'
+      operationId: getService
+      description: Retrieve data about a single service.
+    put:
+      summary: ''
+      operationId: updateService
+      responses:
+        '200':
+          description: 'OK: the update has been performed.'
+        '202':
+          $ref: '#/components/responses/accepted'
+        '304':
+          description: 'Not Modified: this may be returned in situations when the service contained in the body is exactly the same as the one reported previously. Therefore, since the operation may take a while, the adaptor may choose not to perform any operations about this service.'
+        '400':
+          description: 'Bad Request: The request is not valid. A `message` is included to provide more information about the error.'
+          content:
+            application/json:
+              schema:
+                $ref: ./common/schemas.openapi.yaml#/components/schemas/Response
+              examples:
+                Missing address:
+                  $ref: '#/components/examples/response-missing-address'
+                Missing metadata:
+                  $ref: '#/components/examples/response-missing-metadata'
+        '404':
+          description: Not Found.
+        '500':
+          $ref: '#/components/responses/internalServerError'
+      description: |-
+        Provide new data for the service specified inside `{name}`.
+
+        As for `POST /services`, this operation may take a while, so it's common to receive a `202 ACCEPTED` rather than a `200 OK`.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: ./common/schemas.openapi.yaml#/components/schemas/Service
+            examples:
+              Payroll:
+                $ref: '#/components/examples/payroll-service'
+              Training:
+                $ref: '#/components/examples/training-service'
+        description: Data about the service to update. Providing a different `name` from the one in the path will have no effect.
+      tags:
+        - services
+    delete:
+      summary: ''
+      operationId: deleteService
+      responses:
+        '200':
+          description: OK.
+        '202':
+          $ref: '#/components/responses/accepted'
+        '404':
+          description: Not Found.
+        '500':
+          $ref: '#/components/responses/internalServerError'
+      description: Delete a service.
+      tags:
+        - services
+components:
+  schemas: {}
+  examples:
+    full-services-list:
+      value:
+        - name: hr/payroll
+          metadata:
+            traffic-profile: standard
+            version: v1.2.1
+            commit: 4so3329zcv
+            maintainers: software-team
+            contact: support@department.my-company.com
+          endpoints:
+            - name: hr/payroll/payroll-asd4g31df
+              address: 10.10.10.1
+              port: 8080
+              metadata:
+                weight: '25'
+              protocols:
+                transport: TCP
+            - name: hr/payroll/payroll-bfea51113
+              address: 10.10.10.2
+              port: 8080
+              metadata:
+                weight: '25'
+              protocols:
+                transport: TCP
+            - name: hr/payroll/payroll-e24289aa5
+              address: 10.10.10.3
+              port: 8080
+              metadata:
+                weight: '50'
+              protocols:
+                transport: TCP
+        - name: training
+          metadata:
+            traffic-profile: video
+            version: v1.5.0
+            maintainers: software-team
+            contact: job-training@company.com
+          endpoints:
+            - name: training-2zd5api8pr
+              address: 20.20.20.20
+              port: 80
+              protocols:
+                transport: TCP
+                application: HTTP
+            - name: training-ebe248c90
+              address: 20.20.20.21
+              port: 80
+              protocols:
+                transport: TCP
+                application: HTTP
+    internal-server-error:
+      value:
+        code: 500
+        type: INTERNAL_SERVER_ERROR
+        message: An error occurred while trying to parse the request.
+    create-service-response:
+      value:
+        code: 200
+        type: OK
+        message: 'The request is valid but no endpoints are included: no further operation was performed.'
+    200-empty-message:
+      value:
+        code: 200
+        type: OK
+    accepted:
+      value:
+        code: 202
+        type: ACCEPTED
+        message: The operation has been accepted.
+    response-missing-address:
+      value:
+        code: 400
+        type: MISSING_ADDRESS
+        message: Endpoint at position 1 has no address.
+    response-missing-metadata:
+      value:
+        code: 400
+        type: MISSING_REQUIRED_METADATA
+        message: Service does not contain 'traffic_profile' metadata key.
+    response-missing-service-name:
+      value:
+        code: 400
+        type: MISSING_SERVICE_NAME
+        message: Service does not have a name.
+    response-missing-endpoint-name:
+      value:
+        code: 400
+        type: MISSING_ENDPOINT_NAME
+        message: Endpoint at position 1 does not have a name.
+    payroll-service:
+      value:
+        name: hr/payroll
+        metadata:
+          traffic-profile: standard
+          version: v1.2.1
+          commit: 4so3329zcv
+          maintainers: software-team
+          contact: support@department.my-company.com
+        endpoints:
+          - name: hr/payroll/payroll-asd4g31df
+            address: 10.10.10.1
+            port: 8080
+            metadata:
+              weight: '25'
+            protocols:
+              transport: TCP
+          - name: hr/payroll/payroll-bfea51113
+            address: 10.10.10.2
+            port: 8080
+            metadata:
+              weight: '25'
+            protocols:
+              transport: TCP
+          - name: hr/payroll/payroll-e24289aa5
+            address: 10.10.10.3
+            port: 8080
+            metadata:
+              weight: '50'
+            protocols:
+              transport: TCP
+    training-service:
+      value:
+        name: training
+        metadata:
+          traffic-profile: video
+          version: v1.5.0
+          maintainers: software-team
+          contact: job-training@company.com
+        endpoints:
+          - name: training-2zd5api8pr
+            address: 20.20.20.20
+            port: 80
+            protocols:
+              transport: TCP
+              application: HTTP
+          - name: training-ebe248c90
+            address: 20.20.20.21
+            port: 80
+            protocols:
+              transport: TCP
+              application: HTTP
+    service-empty-endpoints:
+      value:
+        name: user-profile
+        metadata:
+          traffic-profile: standard
+          contact: hr@company.com
+        endpoints: []
+  responses:
+    listServices200:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: ./common/schemas.openapi.yaml#/components/schemas/Service
+          examples:
+            Full services list:
+              $ref: '#/components/examples/full-services-list'
+            Empty list:
+              value: []
+    internalServerError:
+      description: Something happened that prevented the request to complete successfully.
+      content:
+        application/json:
+          schema:
+            $ref: ./common/schemas.openapi.yaml#/components/schemas/Response
+          examples:
+            Internal server error:
+              $ref: '#/components/examples/internal-server-error'
+    createService200:
+      description: 'Operation was successful, but the service contained no endpoints.'
+      content:
+        application/json:
+          schema:
+            $ref: ./common/schemas.openapi.yaml#/components/schemas/Response
+          examples:
+            200 Response:
+              $ref: '#/components/examples/create-service-response'
+            Empty message:
+              $ref: '#/components/examples/200-empty-message'
+    accepted:
+      description: The operation was accepted and will be performed as soon as possible.
+      content:
+        application/json:
+          schema:
+            $ref: ./common/schemas.openapi.yaml#/components/schemas/Response
+          examples:
+            Accepted:
+              $ref: '#/components/examples/accepted'
+  parameters:
+    service-name:
+      name: serviceName
+      in: path
+      required: true
+      schema:
+        type: string
+        example: hr/payroll
+      description: The name of the service.

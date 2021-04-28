@@ -1,0 +1,3 @@
+# CN-WAN Application Discovery API
+
+The **CN-WAN Application Discovery API** is designed for the transfer of application metadata to/from a **service registry**. It was originally developed for use within the components of the [Cloud-Native SD-WAN project](https://github.com/CloudNativeSDWAN), but it was designed with the goal to be used as generic application discovery API for SD-WAN products interacting with cloud-native workloads. Please take a look at the [CN-WAN project documentation](https://github.com/CloudNativeSDWAN/cnwan-docs) for an overview of the solution architecture, and the intended use for this API.

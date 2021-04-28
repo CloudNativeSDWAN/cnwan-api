@@ -1,0 +1,14 @@
+summary: Operations about a single service.
+description: Operations about a single service.
+
+
+get:
+  $ref: "./operations/get_service.yaml"
+
+
+put:
+  $ref: "./operations/update_service.yaml"
+
+
+delete:
+  $ref: "./operations/delete_service.yaml"

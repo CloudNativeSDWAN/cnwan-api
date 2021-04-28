@@ -1,0 +1,6 @@
+summary: Settings about the Adaptor.
+description: Get the current settings configured for the Adaptor.
+
+
+get:
+  $ref: "./operations/list_metadata_keys.yaml"

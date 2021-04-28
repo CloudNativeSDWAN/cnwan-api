@@ -1,0 +1,46 @@
+tags:
+  - services
+summary: Revert changes for a service.
+description: |
+  `DELETE /services/{name}` tries to revert modifications applied for the
+  service defined inside `{name}`.<br/><br/>
+
+  As with `POST /services` and `PUT /services/{name}` this operation may
+  take a while to complete, so the Adaptor will return a `202 ACCEPTED` rather
+  than a `200 OK`.
+
+operationId: deleteService
+
+
+parameters:
+  - name: name
+    in: path
+    description: The name of the service to delete.
+    required: true
+    schema:
+      type: string
+    example: "hr/payroll"
+
+responses:
+
+  202:
+    $ref: '../../../responses/global_responses.yaml#/202'
+
+  404:
+    summary: Service not found
+    description: The service was not found. A `message` may be optionally
+      included.
+    content:
+      application/json:
+        schema:
+          $ref: '../../../schemas/response.yaml'
+        example:
+          code: 404
+          type: NOT_FOUND
+
+  500:
+    $ref: "../../../responses/global_responses.yaml#/genericError"
+
+# TODO: this is a list operation, does this code really make any sense?
+  503:
+    $ref: "../../../responses/global_responses.yaml#/unauthenticated"
